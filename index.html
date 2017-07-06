@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="no-js">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://zeptojs.com/zepto.min.js"></script>
+    <script src="index.js"></script>
+    <style>
+        button,
+        input,
+        svg {
+            outline: solid 1px greenyellow;
+        }
+
+        .form-config {
+            display: none;
+        }
+
+        .label-wraper {
+            height: 40px;
+            line-height: 40px;
+            margin-top: 4px;
+        }
+
+        .label-wraper>label {
+            margin-right: 8px;
+        }
+
+        .form-config button {
+            width: 100px;
+            height: 40px;
+            outline: solid 1px #ff00cc;
+        }
+
+        textarea {
+            outline: solid 1px blue;
+        }
+    </style>
+</head>
+
+<body>
+
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="320" height="120">
+
+        <rect width="80" height="20" style="fill: #eee;" x="20" y="20">
+            <animate attributeName="width"  attributeType="XML" from="0" to="50" begin="0s" dur="1s"></animate>
+        </rect>
+        <rect width="80" height="20" style="fill: #eee;" x="20" y="60">
+            <animate attributeName="width"  attributeType="XML" from="0" to="50" begin="0s" dur="1s"></animate>
+        </rect>
+        <rect width="100" height="20" style="fill: #eee;" x="120" y="20">
+            <animate attributeName="width"  attributeType="XML" from="0" to="50" begin="0s" dur="1s"></animate>
+        </rect>
+        <rect width="160" height="20" style="fill: #eee;" x="120" y="100">
+            <animate attributeName="width"  attributeType="XML" from="0" to="50" begin="0s" dur="1s"></animate>
+        </rect>
+        <rect width="140" height="20" style="fill: #eee;" x="120" y="60">
+            <animate attributeName="width"  attributeType="XML" from="0" to="50" begin="0s" dur="1s"></animate>
+        </rect>
+    </svg>
+    <div id="tool">
+        <button id="add">add</button>
+    </div>
+    <form class="svg-form">
+        <fieldset>
+            <legend>svg 尺寸大小</legend>
+            <div>
+                <label>宽度：</label>
+                <input type="text" name="width" value="320" />
+            </div>
+            <div>
+                <label>高度：</label>
+                <input type="text" name="height" value="100" />
+            </div>
+            <button type="button" id="setSvg"> set</button>
+            <button type="button" id="copy"> copy</button>
+        </fieldset>
+    </form>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg-wraper" width="320" height="160">
+
+    </svg>
+
+    <div class="toos-wraper" id="toos-wraper">
+
+    </div>
+    <textarea rows="10" cols="100" id="svgHtml"></textarea>
+
+    <script>
+        var svgWraper = document.getElementById('svg-wraper');
+        var $toolWraper = $('#toos-wraper');
+        //   rect-form-{{num}}: rect instance
+        var mapSvgForm = {};
+        var rectConfig = {
+            postion: {
+                x: '',
+                y: ''
+            },
+            size: {
+                width: '',
+                height: ''
+            },
+            fill: {
+
+            }
+        };
+        var rectAttributeData = [{
+                key: 'width',
+                value: 80
+            },
+            {
+                key: 'height',
+                value: 80
+            },
+            {
+                key: 'style',
+                value: 'fill: #eee;'
+            },
+            {
+                key: 'x',
+                value: '20'
+            },
+            {
+                key: 'y',
+                value: '20'
+            },
+        ];
+
+
+        // add a svg element
+        $('#add').on('click', function () {
+            var rect = SvgTool.createSvgChild('rect');
+            SvgTool.setAttributeData(rect, rectAttributeData);
+            var animateSvg = SvgTool.createAnimateEle(50);
+            rect.appendChild(animateSvg);
+            var id = SvgTool.getAttributeData(rect, 'id');
+            var type = id.split('-')[0];
+            var count = id.split('-')[1];
+            var formId = type + '-form-' + count;
+            var $formWraper = null;
+            rect.onclick = function () {
+                var $formWraper = $toolWraper.find('#' + formId);
+                var size = $formWraper.size();
+                $formWraper.siblings().hide();
+                $formWraper.show();
+            };
+            $formWraper = $(FormTool.createForm(type, formId, rectAttributeData));
+            $formWraper.appendTo($toolWraper);
+            mapSvgForm[formId] = rect;
+            svgWraper.appendChild(rect);
+
+        });
+
+        $('#setSvg').on('click', function () {
+            var width = $('.svg-form').find('input[name="width"]').val()
+            var height = $('.svg-form').find('input[name="height"]').val()
+            svgWraper.setAttribute('width', width);
+            svgWraper.setAttribute('height', height);
+        });
+
+
+        $toolWraper.on('click', 'button', function () {
+            var $formWraper = $(this).closest('.form-config');
+            var formData = FormTool.getFormData($formWraper);
+            var id = $formWraper.attr('id');
+            var svgInstance = mapSvgForm[id];
+            SvgTool.setAttributeData(svgInstance, formData);
+            $formWraper.hide();
+
+        });
+        var $svgHtml = $('#svgHtml');
+        $('#copy').on('click', function () {
+            var svgHtml = $('<div>').append($('svg').clone()).html().replace(/\sid=\"\S+\"/g, "");
+            $svgHtml.val(svgHtml);
+        });
+    </script>
+</body>
+
+</html>
